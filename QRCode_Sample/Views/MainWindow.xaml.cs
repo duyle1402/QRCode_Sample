@@ -22,14 +22,13 @@ using Cognex.DataMan.SDK.Utils;
 using QRCode_Sample.Resources.CognexLib;
 using Image = System.Drawing.Image;
 using System.Windows.Forms;
+using WPFUI.Common;
+using WPFUI.Controls.Interfaces;
 namespace QRCode_Sample.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
-    /// </summary>
-
-
-    
+    /// </summary>    
     public partial class MainWindow : Window
     {
 
@@ -51,9 +50,30 @@ namespace QRCode_Sample.Views
         {
             InitializeComponent();
             _syncContext = DispatcherSynchronizationContext.Current;
-        }
+			InvokeSplashScreen();
+		}
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+		private void InvokeSplashScreen()
+		{
+			RootMainGrid.Visibility = Visibility.Collapsed;
+			RootWelcomeGrid.Visibility = Visibility.Visible;
+
+			Task.Run(async () =>
+			{
+				// Remember to always include Delays and Sleeps in
+				// your applications to be able to charge the client for optimizations later.
+				await Task.Delay(10000);
+
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+				{
+					RootWelcomeGrid.Visibility = Visibility.Hidden;
+					RootMainGrid.Visibility = Visibility.Visible;
+				});
+			});
+		}
+
+
+		private void Window_Loaded(object sender, RoutedEventArgs e)
         {
 
 			System.Windows.Forms.Integration.WindowsFormsHost host =
@@ -67,7 +87,7 @@ namespace QRCode_Sample.Views
 
 			// Add the interop host control to the Grid
 			// control's collection of child controls.
-			this.stackpanel1.Children.Add(host);
+			this.gridPicture.Children.Add(host);
 
 
 
@@ -225,14 +245,13 @@ namespace QRCode_Sample.Views
 
 		}
 
-
-		private void cbEnableKeepAlive_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+		private void cbEnableKeepAlive_Checked(object sender, RoutedEventArgs e)
 		{
 			if (null != _system)
 				_system.SetKeepAliveOptions((bool)cbEnableKeepAlive.IsChecked, 3000, 1000);
 		}
 
-		private void cbLiveDisplay_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+		private void cbLiveDisplay_Checked(object sender, RoutedEventArgs e)
 		{
 			try
 			{
@@ -248,17 +267,29 @@ namespace QRCode_Sample.Views
 						OnLiveImageArrived,
 						null);
 				}
-				else
-				{
-					btnTrigger.IsEnabled = true;
-
-					//_system.SendCommand("SET LIVEIMG.MODE 0");
-				}
+				
 			}
 			catch (Exception ex)
 			{
-                System.Windows.MessageBox.Show("Failed to set live image mode: " + ex.ToString());
+				System.Windows.MessageBox.Show("Failed to set live image mode: " + ex.ToString());
 			}
+		}
+		private void cbLiveDisplay_Unchecked(object sender, RoutedEventArgs e)
+		{
+            try 
+			{
+				if (!(bool)cbLiveDisplay.IsChecked)
+				{
+					btnTrigger.IsEnabled = true;
+
+					_system.SendCommand("SET LIVEIMG.MODE 0");
+				}
+			}
+			catch(Exception ex)
+            {
+				System.Windows.MessageBox.Show(ex.ToString());
+			}
+			
 		}
 
 		private void lbDetectedSystem_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -338,15 +369,17 @@ namespace QRCode_Sample.Views
 			}
 		}
 
-		private void cbLoggingEnabled_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+		private void cbLoggingEnabled_Checked(object sender, RoutedEventArgs e)
 		{
 			if (_connector != null && _connector.Logger != null)
 			{
-				_connector.Logger.Enabled = _logger.Enabled =	(bool)cbLoggingEnabled.IsChecked;
+				_connector.Logger.Enabled = _logger.Enabled = (bool)cbLoggingEnabled.IsChecked;
 				_logger.Log("Logging", _connector.Logger.Enabled ? "enabled" : "disabled");
+
 			}
 		}
-		private void Log(string function, string message)
+
+            private void Log(string function, string message)
 		{
 			if (_logger != null)
 				_logger.Log(function, message);
@@ -652,15 +685,8 @@ namespace QRCode_Sample.Views
 		}
 
 
-
-
-
-
-
-
-
         #endregion
 
-      
+        
     }
 }
