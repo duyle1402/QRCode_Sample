@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QRCode_Sample.Views"
         mc:Ignorable="d"
-        Title="ReconnectingWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="ReconnectingWindow" Height="122" Width="213" Loaded="Window_Loaded">
+    <Grid Margin="60,35,53,31">
+        <Button x:Name="btnCancel" Content="Cancel" Click="btnCancel_Click"/>
     </Grid>
 </Window>

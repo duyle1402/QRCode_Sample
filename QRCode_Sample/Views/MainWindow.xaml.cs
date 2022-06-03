@@ -21,7 +21,7 @@ using Cognex.DataMan.SDK.Discovery;
 using Cognex.DataMan.SDK.Utils;
 using QRCode_Sample.Resources.CognexLib;
 using Image = System.Drawing.Image;
-
+using System.Windows.Forms;
 namespace QRCode_Sample.Views
 {
     /// <summary>
@@ -45,7 +45,9 @@ namespace QRCode_Sample.Views
         private bool _autoconnect = false;
         private object _listAddItemLock = new object();
         private GuiLogger _logger;
-        public MainWindow()
+		private PictureBox picResultImage;
+
+		public MainWindow()
         {
             InitializeComponent();
             _syncContext = DispatcherSynchronizationContext.Current;
@@ -53,7 +55,23 @@ namespace QRCode_Sample.Views
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            _logger = new GuiLogger(tbLog, (bool)cbLoggingEnabled.IsChecked, ref _closing);
+
+			System.Windows.Forms.Integration.WindowsFormsHost host =
+		new System.Windows.Forms.Integration.WindowsFormsHost();
+
+			// Create the MaskedTextBox control.
+			PictureBox pictureBox = new PictureBox();
+			picResultImage = pictureBox;
+			// Assign the MaskedTextBox control as the host control's child.
+			host.Child = picResultImage;
+
+			// Add the interop host control to the Grid
+			// control's collection of child controls.
+			this.stackpanel1.Children.Add(host);
+
+
+
+			_logger = new GuiLogger(tbLog, (bool)cbLoggingEnabled.IsChecked, ref _closing);
 
             // Create discoverers to discover ethernet and serial port systems.
             _ethSystemDiscoverer = new EthSystemDiscoverer();
@@ -109,7 +127,183 @@ namespace QRCode_Sample.Views
             AddListItem(string.Format("Partial result dropped: {0}, id={1}", result.Id.Type.ToString(), result.Id.Id));
         }
 
-        private void RefreshGui()
+		private void btnConnect_Click(object sender, RoutedEventArgs e)
+		{
+			if (lbDetectedSystem.SelectedIndex == -1 || lbDetectedSystem.SelectedIndex >= lbDetectedSystem.Items.Count)
+				return;
+
+			btnConnect.IsEnabled = false;
+			_autoconnect = false;
+
+			try
+			{
+				var system_info = lbDetectedSystem.Items[lbDetectedSystem.SelectedIndex];
+
+				if (system_info is EthSystemDiscoverer.SystemInfo)
+				{
+					EthSystemDiscoverer.SystemInfo eth_system_info = system_info as EthSystemDiscoverer.SystemInfo;
+					EthSystemConnector conn = new EthSystemConnector(eth_system_info.IPAddress, eth_system_info.Port);
+
+					conn.UserName = "admin";
+					conn.Password = txtPassword.Text;
+
+					_connector = conn;
+				}
+				else if (system_info is SerSystemDiscoverer.SystemInfo)
+				{
+					SerSystemDiscoverer.SystemInfo ser_system_info = system_info as SerSystemDiscoverer.SystemInfo;
+					SerSystemConnector conn = new SerSystemConnector(ser_system_info.PortName, ser_system_info.Baudrate);
+
+					_connector = conn;
+				}
+
+				_logger.Enabled = (bool)cbLoggingEnabled.IsChecked;
+				_connector.Logger = _logger;
+
+				_system = new DataManSystem(_connector);
+				_system.DefaultTimeout = 5000;
+
+				// Subscribe to events that are signalled when the system is connected / disconnected.
+				_system.SystemConnected += new SystemConnectedHandler(OnSystemConnected);
+				_system.SystemDisconnected += new SystemDisconnectedHandler(OnSystemDisconnected);
+				_system.SystemWentOnline += new SystemWentOnlineHandler(OnSystemWentOnline);
+				_system.SystemWentOffline += new SystemWentOfflineHandler(OnSystemWentOffline);
+				_system.KeepAliveResponseMissed += new KeepAliveResponseMissedHandler(OnKeepAliveResponseMissed);
+				_system.BinaryDataTransferProgress += new BinaryDataTransferProgressHandler(OnBinaryDataTransferProgress);
+				_system.OffProtocolByteReceived += new OffProtocolByteReceivedHandler(OffProtocolByteReceived);
+				_system.AutomaticResponseArrived += new AutomaticResponseArrivedHandler(AutomaticResponseArrived);
+
+				// Subscribe to events that are signalled when the device sends auto-responses.
+				ResultTypes requested_result_types = ResultTypes.ReadXml | ResultTypes.Image | ResultTypes.ImageGraphics;
+				_results = new ResultCollector(_system, requested_result_types);
+				_results.ComplexResultCompleted += Results_ComplexResultCompleted;
+				_results.SimpleResultDropped += Results_SimpleResultDropped;
+
+				_system.SetKeepAliveOptions((bool)cbEnableKeepAlive.IsChecked, 3000, 1000);
+
+				_system.Connect();
+
+				try
+				{
+					_system.SetResultTypes(requested_result_types);
+				}
+				catch
+				{ }
+			}
+			catch (Exception ex)
+			{
+				CleanupConnection();
+
+				AddListItem("Failed to connect: " + ex.ToString());
+			}
+
+			_autoconnect = true;
+			RefreshGui();
+		}
+
+		private void btnDisconnect_Click(object sender, RoutedEventArgs e)
+		{
+			try
+			{
+				if (_system == null || _system.State != ConnectionState.Connected)
+					return;
+
+				btnDisconnect.IsEnabled = false;
+
+				_autoconnect = false;
+				_system.Disconnect();
+
+				CleanupConnection();
+
+				_results.ClearCachedResults();
+				_results = null;
+			}
+			finally
+			{
+				RefreshGui();
+			}
+
+		}
+
+
+		private void cbEnableKeepAlive_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+		{
+			if (null != _system)
+				_system.SetKeepAliveOptions((bool)cbEnableKeepAlive.IsChecked, 3000, 1000);
+		}
+
+		private void cbLiveDisplay_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+		{
+			try
+			{
+				if ((bool)cbLiveDisplay.IsChecked)
+				{
+					btnTrigger.IsEnabled = false;
+
+					_system.SendCommand("SET LIVEIMG.MODE 2");
+					_system.BeginGetLiveImage(
+						ImageFormat.jpeg,
+						ImageSize.Sixteenth,
+						ImageQuality.Medium,
+						OnLiveImageArrived,
+						null);
+				}
+				else
+				{
+					btnTrigger.IsEnabled = true;
+
+					//_system.SendCommand("SET LIVEIMG.MODE 0");
+				}
+			}
+			catch (Exception ex)
+			{
+                System.Windows.MessageBox.Show("Failed to set live image mode: " + ex.ToString());
+			}
+		}
+
+		private void lbDetectedSystem_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (lbDetectedSystem.SelectedIndex != -1 && lbDetectedSystem.Items.Count > lbDetectedSystem.SelectedIndex)
+			{
+				var system_info = lbDetectedSystem.Items[lbDetectedSystem.SelectedIndex];
+
+				if (system_info is EthSystemDiscoverer.SystemInfo)
+				{
+					EthSystemDiscoverer.SystemInfo eth_system_info = system_info as EthSystemDiscoverer.SystemInfo;
+
+					txtDevice.Text = eth_system_info.IPAddress.ToString();
+				}
+				else if (system_info is SerSystemDiscoverer.SystemInfo)
+				{
+					SerSystemDiscoverer.SystemInfo ser_system_info = system_info as SerSystemDiscoverer.SystemInfo;
+
+					txtDevice.Text = ser_system_info.PortName;
+				}
+			}
+
+			RefreshGui();
+		}
+
+		private void btnRefresh_Click(object sender, RoutedEventArgs e)
+		{
+			try
+			{
+				if (_ethSystemDiscoverer.IsDiscoveryInProgress || _serSystemDiscoverer.IsDiscoveryInProgress)
+					return;
+
+				lbDetectedSystem.Items.Clear();
+
+				_ethSystemDiscoverer.Discover();
+				_serSystemDiscoverer.Discover();
+			}
+			finally
+			{
+				RefreshGui();
+			}
+		}
+
+
+		private void RefreshGui()
         {
             bool system_connected = _system != null && _system.State == ConnectionState.Connected;
             bool system_ready_to_connect = _system == null || _system.State == ConnectionState.Disconnected;
@@ -128,7 +322,7 @@ namespace QRCode_Sample.Views
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show("Failed to send TRIGGER ON command: " + ex.ToString());
+                System.Windows.MessageBox.Show("Failed to send TRIGGER ON command: " + ex.ToString());
 			}
 		}
 
@@ -140,10 +334,18 @@ namespace QRCode_Sample.Views
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show("Failed to send TRIGGER OFF command: " + ex.ToString());
+                System.Windows.MessageBox.Show("Failed to send TRIGGER OFF command: " + ex.ToString());
 			}
 		}
 
+		private void cbLoggingEnabled_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+		{
+			if (_connector != null && _connector.Logger != null)
+			{
+				_connector.Logger.Enabled = _logger.Enabled =	(bool)cbLoggingEnabled.IsChecked;
+				_logger.Log("Logging", _connector.Logger.Enabled ? "enabled" : "disabled");
+			}
+		}
 		private void Log(string function, string message)
 		{
 			if (_logger != null)
@@ -200,7 +402,7 @@ namespace QRCode_Sample.Views
 					{
 						ReconnectingWindow wd = new ReconnectingWindow(this, _system);
 
-						if (wd.ShowDialog() == DialogResult.Cancel)
+						//if (wd.ShowDialog() == MessageBoxResult.Cancel)
 							reset_gui = true;
 					}
 					else
@@ -299,7 +501,7 @@ namespace QRCode_Sample.Views
 				_syncContext.Post(
 					delegate
 					{
-                        System.Drawing.Size image_size = Gui.FitImageInControl(image.Size, imgResultPicture.Size);
+                        System.Drawing.Size image_size = Gui.FitImageInControl(image.Size, picResultImage.Size);
                         System.Drawing.Image fitted_image = Gui.ResizeImageToBitmap(image, image_size);
 						picResultImage.Image = fitted_image;
 						picResultImage.Invalidate();
@@ -420,7 +622,7 @@ namespace QRCode_Sample.Views
 					}
 				}
 
-				if (imgResultPicture.Image != null)
+				if (picResultImage.Image != null)
 				{
 					var image = picResultImage.Image;
 					picResultImage.Image = null;
@@ -450,8 +652,15 @@ namespace QRCode_Sample.Views
 		}
 
 
+
+
+
+
+
+
+
         #endregion
 
-        
+      
     }
 }
