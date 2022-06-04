@@ -62,7 +62,7 @@ namespace QRCode_Sample.Views
 			{
 				// Remember to always include Delays and Sleeps in
 				// your applications to be able to charge the client for optimizations later.
-				await Task.Delay(10000);
+				await Task.Delay(4000);
 
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
 				{
@@ -685,8 +685,29 @@ namespace QRCode_Sample.Views
 		}
 
 
+
         #endregion
 
         
+        
+			private void RootNavigation_OnNavigated(INavigation sender, RoutedNavigationEventArgs e)
+			{
+				System.Diagnostics.Debug.WriteLine($"DEBUG | WPF UI Navigated to: {e.CurrentPage.PageTag}", "WPFUI.Demo");
+
+				// This funky solution allows us to impose a negative
+				// margin for Frame only for the Dashboard page, thanks
+				// to which the banner will cover the entire page nicely.
+				RootFrame.Margin = new Thickness(
+					left: 0,
+					top: e.CurrentPage.PageTag == "dashboard" ? -69 : 0,
+					right: 0,
+					bottom: 0);
+			}
+        #region fontend
+        private void NavigationButtonTheme_OnClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
     }
 }
