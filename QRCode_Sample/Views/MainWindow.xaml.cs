@@ -51,6 +51,19 @@ namespace QRCode_Sample.Views
             InitializeComponent();
             _syncContext = DispatcherSynchronizationContext.Current;
 			InvokeSplashScreen();
+			InitializeUi();
+		}
+		private void InitializeUi()
+		{
+			Loaded += (sender, args) =>
+			{
+				// After loading the main application window,
+				// we register the Watcher class, which automatically
+				// changes the theme and accent of the application.
+				WPFUI.Appearance.Watcher.Watch(this, WPFUI.Appearance.BackgroundType.Mica, true, true);
+
+
+			};
 		}
 
 		private void InvokeSplashScreen()
@@ -332,7 +345,6 @@ namespace QRCode_Sample.Views
 				RefreshGui();
 			}
 		}
-
 
 		private void RefreshGui()
         {
@@ -690,8 +702,8 @@ namespace QRCode_Sample.Views
 
         
         
-			private void RootNavigation_OnNavigated(INavigation sender, RoutedNavigationEventArgs e)
-			{
+	private void RootNavigation_OnNavigated(INavigation sender, RoutedNavigationEventArgs e)
+	{
 				System.Diagnostics.Debug.WriteLine($"DEBUG | WPF UI Navigated to: {e.CurrentPage.PageTag}", "WPFUI.Demo");
 
 				// This funky solution allows us to impose a negative
@@ -702,12 +714,23 @@ namespace QRCode_Sample.Views
 					top: e.CurrentPage.PageTag == "dashboard" ? -69 : 0,
 					right: 0,
 					bottom: 0);
-			}
+	}
         #region fontend
         private void NavigationButtonTheme_OnClick(object sender, RoutedEventArgs e)
         {
+			// We check what theme is currently
+			// active and choose its opposite.
+			var newTheme = WPFUI.Appearance.Theme.GetAppTheme() == WPFUI.Appearance.ThemeType.Dark
+				? WPFUI.Appearance.ThemeType.Light
+				: WPFUI.Appearance.ThemeType.Dark;
 
-        }
+			// We apply the theme to the entire application.
+			WPFUI.Appearance.Theme.Apply(
+				themeType: newTheme,
+				backgroundEffect: WPFUI.Appearance.BackgroundType.Mica,
+				updateAccent: true,
+				forceBackground: false);
+		}
         #endregion
     }
 }

@@ -8,13 +8,17 @@
         xmlns:pages="clr-namespace:QRCode_Sample.Views.Pages"
         mc:Ignorable="d"
         Title="MainWindow" 
-        Height="800" Width="1200"       
+        Height="800" Width="1200" 
+       
         Loaded="Window_Loaded" 
-        Unloaded="Window_Unloaded">
-    <Grid Background="#FF0E0E0E">
+        Unloaded="Window_Unloaded" WindowStartupLocation="CenterScreen">
+    <Grid >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="43*"/>
-            <ColumnDefinition Width="197*"/>
+            <ColumnDefinition Width="44*"/>
+            <ColumnDefinition Width="135*"/>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="8*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="39*"/>
@@ -22,7 +26,7 @@
         </Grid.RowDefinitions>
         <!--Main Grid-->
         <Grid x:Name="RootMainGrid"
-            Grid.Row="1" Margin="0,10,0,0" Grid.ColumnSpan="2">
+            Grid.Row="1" Margin="0,10,0,0" Grid.ColumnSpan="5">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>
@@ -68,9 +72,7 @@
                         PageTag="Chart" />
                 </wpfui:NavigationStore.Items>
                 <wpfui:NavigationStore.Footer>
-
                     <!--A navigation element that does not point to the page can be used as a button.-->
-
                     <wpfui:NavigationItem
                         Click="NavigationButtonTheme_OnClick"
                         Content="Theme"
@@ -94,7 +96,6 @@
                         VerticalAlignment="Top"
                         FontSize="24"
                         Navigation="{Binding ElementName=RootNavigation}" />-->
-
                 </Grid>
             </Border>
             <Grid Grid.Column="1" Grid.Row="0" Margin="0,0,0,367" Grid.RowSpan="2">
@@ -111,7 +112,9 @@
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,269,196" Grid.RowSpan="2">
+                    <Grid Grid.Row="0" Grid.Column="0" 
+                          Grid.ColumnSpan="2" Margin="0,0,269,196" 
+                          Grid.RowSpan="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
@@ -121,31 +124,36 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,1,1">
-                            <TextBlock Text="Device " Foreground="White"/>
-                            <TextBlock Text="Password " Foreground="White"/>
+                            <Label Content="Device" />
+                            <Label Content="Password" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Grid.Row="0" Margin="0,0,0,59" Grid.RowSpan="2">
-                            <wpfui:TextBox x:Name="txtDevice">
-                                <wpfui:TextBox.IconForeground>
-                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                                        <GradientStop Color="Black"/>
-                                        <GradientStop Color="#FF7D1212" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </wpfui:TextBox.IconForeground>
-                            </wpfui:TextBox>
+                            <wpfui:TextBox x:Name="txtDevice" />
                             <wpfui:TextBox x:Name="txtPassword"/>
-                            <CheckBox x:Name="cbEnableKeepAlive" Content="Run Keep Alive" Checked="cbEnableKeepAlive_Checked"/>
-                            <CheckBox x:Name="cbAutoReconnect" Content="Auto-Reconnect"/>
+                            <CheckBox x:Name="cbEnableKeepAlive" 
+                                      Content="Run Keep Alive" 
+                                      Checked="cbEnableKeepAlive_Checked"/>
+                            <CheckBox x:Name="cbAutoReconnect" 
+                                      Content="Auto-Reconnect"/>
 
                         </StackPanel>
                         <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,27,0,0" >
-                            <Button x:Name="btnConnect" Content="Connect" Click="btnConnect_Click"/>
-                            <Button x:Name="btnDisconnect" Content="Disconnect" Click="btnDisconnect_Click"/>
+                            <Button x:Name="btnConnect" 
+                                    Content="Connect" 
+                                    Click="btnConnect_Click"/>
+                            <Button x:Name="btnDisconnect" 
+                                    Content="Disconnect" 
+                                    Click="btnDisconnect_Click"/>
                         </StackPanel>
                     </Grid>
                     <StackPanel Grid.Column="1" Orientation="Vertical">
-                        <ListBox x:Name="lbDetectedSystem" Height="149" SelectionChanged="lbDetectedSystem_SelectionChanged" BorderBrush="#FF902424" Background="#0FA6D411"/>
-                        <Button x:Name="btnRefresh" Content="Refresh" Height="35" Click="btnRefresh_Click"/>
+                        <ListBox x:Name="lbDetectedSystem" 
+                                 Height="149" 
+                                 SelectionChanged="lbDetectedSystem_SelectionChanged" 
+                                 />
+                        <Button x:Name="btnRefresh" 
+                                Content="Refresh" Height="35" 
+                                Click="btnRefresh_Click"/>
 
                     </StackPanel>
                     <ListBox x:Name="lbStateConnect" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,10,0,0" />
@@ -157,8 +165,16 @@
                         <RowDefinition Height="38*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal" Height="85" VerticalAlignment="Top" Grid.Row="0">
-                        <Button x:Name="btnTrigger" Margin="52,20,0,25" Width="309" Content="Trigger" MouseDown="btnTrigger_MouseDown" MouseUp="btnTrigger_MouseUp" />
-                        <CheckBox x:Name="cbLiveDisplay" Width="100" Margin="15,1,7,0" Content="Live Display" Checked="cbLiveDisplay_Checked" Unchecked="cbLiveDisplay_Unchecked"/>
+                        <Button x:Name="btnTrigger" 
+                                Margin="52,20,0,25" 
+                                Width="309" Content="Trigger" 
+                                MouseDown="btnTrigger_MouseDown" 
+                                MouseUp="btnTrigger_MouseUp" />
+                        <CheckBox x:Name="cbLiveDisplay" 
+                                  Width="100" Margin="15,1,7,0" 
+                                  Content="Live Display" 
+                                  Checked="cbLiveDisplay_Checked" 
+                                  Unchecked="cbLiveDisplay_Unchecked"/>
                     </StackPanel>
                     <Grid Grid.Row="1" x:Name="gridPicture">
 
@@ -181,7 +197,7 @@
         <!--Welcome Grid-->
         <Grid
             x:Name="RootWelcomeGrid"
-            Visibility="Hidden" Grid.ColumnSpan="2" Margin="0,39,0,0" Grid.RowSpan="2">
+            Visibility="Hidden" Grid.ColumnSpan="5" Margin="0,39,0,0" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
