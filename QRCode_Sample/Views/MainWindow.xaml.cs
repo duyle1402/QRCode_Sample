@@ -24,6 +24,8 @@ using Image = System.Drawing.Image;
 using System.Windows.Forms;
 using WPFUI.Common;
 using WPFUI.Controls.Interfaces;
+using Application = System.Windows.Application;
+
 namespace QRCode_Sample.Views
 {
     /// <summary>
@@ -75,7 +77,7 @@ namespace QRCode_Sample.Views
 			{
 				// Remember to always include Delays and Sleeps in
 				// your applications to be able to charge the client for optimizations later.
-				await Task.Delay(4000);
+				await Task.Delay(7000);
 
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
 				{
@@ -95,6 +97,7 @@ namespace QRCode_Sample.Views
 			// Create the MaskedTextBox control.
 			PictureBox pictureBox = new PictureBox();
 			picResultImage = pictureBox;
+			picResultImage.BackColor = System.Drawing.Color.White;
 			// Assign the MaskedTextBox control as the host control's child.
 			host.Child = picResultImage;
 
@@ -704,14 +707,14 @@ namespace QRCode_Sample.Views
         
 	private void RootNavigation_OnNavigated(INavigation sender, RoutedNavigationEventArgs e)
 	{
-				System.Diagnostics.Debug.WriteLine($"DEBUG | WPF UI Navigated to: {e.CurrentPage.PageTag}", "WPFUI.Demo");
+				//System.Diagnostics.Debug.WriteLine($"DEBUG | WPF UI Navigated to: {e.CurrentPage.PageTag}", "WPFUI.Demo");
 
 				// This funky solution allows us to impose a negative
 				// margin for Frame only for the Dashboard page, thanks
 				// to which the banner will cover the entire page nicely.
 				RootFrame.Margin = new Thickness(
 					left: 0,
-					top: e.CurrentPage.PageTag == "dashboard" ? -69 : 0,
+					top: e.CurrentPage.PageTag == "DebugPage" ? -69 : 0,
 					right: 0,
 					bottom: 0);
 	}
@@ -731,6 +734,15 @@ namespace QRCode_Sample.Views
 				updateAccent: true,
 				forceBackground: false);
 		}
+
         #endregion
+
+        private void NavigationItem_Click(object sender, RoutedEventArgs e)
+        {		
+          	if(System.Windows.MessageBox.Show("You want to exit", "", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+            {
+				Application.Current.Shutdown();
+            }							
+        }
     }
 }

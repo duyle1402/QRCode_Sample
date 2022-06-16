@@ -7,33 +7,41 @@
         xmlns:wpfui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:pages="clr-namespace:QRCode_Sample.Views.Pages"
         mc:Ignorable="d"
-        Title="MainWindow" 
-        Height="800" Width="1200" 
+        Title="QR Code Sample" 
+        Height="720" Width="1100" 
        
         Loaded="Window_Loaded" 
-        Unloaded="Window_Unloaded" WindowStartupLocation="CenterScreen">
+        Unloaded="Window_Unloaded" WindowStartupLocation="CenterScreen" Background="White" WindowStyle="None">
     <Grid >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="43*"/>
-            <ColumnDefinition Width="44*"/>
-            <ColumnDefinition Width="135*"/>
-            <ColumnDefinition Width="10*"/>
-            <ColumnDefinition Width="8*"/>
+            <ColumnDefinition Width="14*"/>
+            <ColumnDefinition Width="77*"/>
+            <ColumnDefinition Width="129*"/>
+
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="39*"/>
-            <RowDefinition Height="745*"/>
+            <RowDefinition Height="11*"/>
+            <RowDefinition Height="133*"/>
         </Grid.RowDefinitions>
+        <wpfui:TitleBar
+            Title="QR Code"
+          
+            ForceShutdown="False"
+            Icon="pack://application:,,,/Assets/geo_icons.png"
+            MinimizeToTray="False"
+            UseSnapLayout="True" Grid.ColumnSpan="3" Height="64" VerticalAlignment="Center" >
+
+        </wpfui:TitleBar>
         <!--Main Grid-->
         <Grid x:Name="RootMainGrid"
-            Grid.Row="1" Margin="0,10,0,0" Grid.ColumnSpan="5">
+            Grid.Row="1" Margin="0,10,18,0" Grid.ColumnSpan="3">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="13*"/>
-                <ColumnDefinition Width="227*"/>
+                <ColumnDefinition Width="7*"/>
+                <ColumnDefinition Width="103*"/>
             </Grid.ColumnDefinitions>
 
             <!--  This is the main navigation of the application.  -->
@@ -41,35 +49,35 @@
                 x:Name="RootNavigation"
                 Grid.Column="0"
                 Grid.RowSpan="2"
-                Margin="6,0,6,0"
+                Margin="8,0,2,0"
                 Frame="{Binding ElementName=RootFrame}"
                 Navigated="RootNavigation_OnNavigated"
                 SelectedPageIndex="0">
                 <wpfui:NavigationStore.Items>
                     <wpfui:NavigationItem
                         Content="Home"
-                        Icon="Home24"                      
+                        Icon="Home24"
+                        Page="{x:Type pages:Dashboard}"
                         PageTag="dashboard" />
                     <wpfui:NavigationItem
                         Content="Debug"
-                        Icon="Rocket20"                      
+                        Icon="Rocket20"    
+                        Page="{x:Type pages:DebugPage}"
                         PageTag="Debug" />
                     <wpfui:NavigationItem
                         Content="Chart"
-                        Icon="DataArea20"                      
+                        Icon="ChartMultiple20" 
+                        Page="{x:Type pages:Chart}"
                         PageTag="Chart" />
                     <wpfui:NavigationItem
-                        Content="Chart"
-                        Icon="Cloud32"                      
-                        PageTag="Chart" />
-                    <wpfui:NavigationItem
-                        Content="Chart"
-                        Icon="DataArea20"                      
+                        Content="Report"
+                        Icon="DataBarVertical24"        
+                        Page="{x:Type pages:ReportArchive}"
                         PageTag="Chart" />
                     <wpfui:NavigationItem
                         Content="Exit"
-                        Icon="ArrowExit20"                      
-                        PageTag="Chart" />
+                        Icon="ArrowExit20" Click="NavigationItem_Click"                  
+                         />
                 </wpfui:NavigationStore.Items>
                 <wpfui:NavigationStore.Footer>
                     <!--A navigation element that does not point to the page can be used as a button.-->
@@ -80,8 +88,7 @@
                 </wpfui:NavigationStore.Footer>
             </wpfui:NavigationStore>
             <Border
-                Grid.Column="1" 
-               
+                Grid.Column="1"               
                 CornerRadius="8,0,0,0" Grid.RowSpan="2">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -89,16 +96,10 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Frame x:Name="RootFrame" Grid.Row="1" />
-                    <!--<wpfui:Breadcrumb
-                        Grid.Row="0"
-                        Margin="18"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        FontSize="24"
-                        Navigation="{Binding ElementName=RootNavigation}" />-->
+              
                 </Grid>
             </Border>
-            <Grid Grid.Column="1" Grid.Row="0" Margin="0,0,0,367" Grid.RowSpan="2">
+            <Grid Grid.Column="1" Grid.Row="0" Margin="0,0,0,38" Visibility="Hidden">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="539*"/>
                     <ColumnDefinition Width="654*"/>
@@ -109,54 +110,52 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
+                        <RowDefinition Height="97*"/>
+                        <RowDefinition Height="49*"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Grid.Column="0" 
-                          Grid.ColumnSpan="2" Margin="0,0,269,196" 
-                          Grid.RowSpan="2">
+                    <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,34,10">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="80*"/>
+                            <ColumnDefinition Width="121*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition/>
+                            <RowDefinition Height="21*"/>
+                            <RowDefinition Height="25*"/>
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,1,1">
-                            <Label Content="Device" />
-                            <Label Content="Password" />
+                            <Label Content="Device" Width="71" Margin="26,9,0,0" />
+                            <Label Content="Password" Width="66" Margin="21,13,0,0" />
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Grid.Row="0" Margin="0,0,0,59" Grid.RowSpan="2">
+                        <StackPanel Grid.Column="1" Grid.Row="0" Margin="5,0,0,59" Grid.RowSpan="2">
                             <wpfui:TextBox x:Name="txtDevice" />
-                            <wpfui:TextBox x:Name="txtPassword"/>
+                            <wpfui:TextBox x:Name="txtPassword" Height="28" Margin="0,3,0,0"/>
                             <CheckBox x:Name="cbEnableKeepAlive" 
                                       Content="Run Keep Alive" 
-                                      Checked="cbEnableKeepAlive_Checked"/>
+                                      Checked="cbEnableKeepAlive_Checked" Margin="0,2,0,0"/>
                             <CheckBox x:Name="cbAutoReconnect" 
                                       Content="Auto-Reconnect"/>
 
                         </StackPanel>
-                        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,27,0,0" >
+                        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,27,0,-15" >
                             <Button x:Name="btnConnect" 
                                     Content="Connect" 
-                                    Click="btnConnect_Click"/>
+                                    Click="btnConnect_Click" Width="154"/>
                             <Button x:Name="btnDisconnect" 
                                     Content="Disconnect" 
-                                    Click="btnDisconnect_Click"/>
+                                    Click="btnDisconnect_Click" Width="154"/>
                         </StackPanel>
                     </Grid>
-                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <StackPanel Orientation="Vertical" Grid.ColumnSpan="2" Margin="235,0,0,0">
                         <ListBox x:Name="lbDetectedSystem" 
-                                 Height="149" 
+                                 Height="130" 
                                  SelectionChanged="lbDetectedSystem_SelectionChanged" 
                                  />
                         <Button x:Name="btnRefresh" 
                                 Content="Refresh" Height="35" 
-                                Click="btnRefresh_Click"/>
+                                Click="btnRefresh_Click" Margin="0,10,0,0"/>
 
                     </StackPanel>
-                    <ListBox x:Name="lbStateConnect" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,10,0,0" />
+                    <ListBox x:Name="lbStateConnect" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,10,0,10" />
                 </Grid>
                 <Grid Grid.Column="1">
                     <Grid.RowDefinitions>
@@ -183,12 +182,12 @@
 
                 </Grid>
             </Grid>
-            <Grid  Grid.Column="1" Grid.Row="1">
+            <Grid  Grid.Column="1" Grid.Row="1" Visibility="Hidden">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="13*"/>
                     <RowDefinition Height="85*"/>
                 </Grid.RowDefinitions>
-                <CheckBox Grid.Row="0" x:Name="cbLoggingEnabled" Content="Logging Enabled" Checked="cbLoggingEnabled_Checked"/>
+                <CheckBox Grid.Row="0" x:Name="cbLoggingEnabled" Content="Logging Enabled" Checked="cbLoggingEnabled_Checked" Margin="10,0,0,0"/>
                 <TextBox x:Name="tbLog" Grid.Row="1" Margin="0,10,0,0"/>
 
 
@@ -197,7 +196,7 @@
         <!--Welcome Grid-->
         <Grid
             x:Name="RootWelcomeGrid"
-            Visibility="Hidden" Grid.ColumnSpan="5" Margin="0,39,0,0" Grid.RowSpan="2">
+            Visibility="Hidden" Grid.ColumnSpan="3" Margin="0,4,0,0" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -214,6 +213,7 @@
                     Margin="0,12,0,0"
                     FontSize="16"
                     FontWeight="Medium"
+                    Foreground="White"
                     Text="Preparing app for you."
                     TextAlignment="Center"
                     TextWrapping="Wrap" />
